@@ -15,6 +15,10 @@ i_turn = 601
 b_spac = 25e-9
 N_slots_bsp = 5
 
+flag_movie = True
+movie_range = (0, 700)
+vmax_movie = 2e11
+
 
 obbea = mfm.myloadmat_to_obj(tag+'_matrices.mat')
 
@@ -66,7 +70,7 @@ mask_bunch = n_mat[1, :]>0
 n_bunches = np.sum(mask_bunch)
 
 
-fig200 = plt.figure(200)
+figrt = plt.figure(2000)
 axx = plt.subplot(3,1,1)
 axx.plot(x_mat[:,mask_bunch])
 axy = plt.subplot(3,1,2, sharex=axx)
@@ -105,62 +109,68 @@ figm.suptitle('Turn %d'%i_turn)
 
 
 
-movie_range = (250, 700)
+if not flag_movie:
+    figbup = plt.figure(1)
+    axbup1 = plt.subplot(2,1,1)
+    axbup2 = plt.subplot(2,1,2, sharex=axbup1)
 
-vmax = 2e11
-
-figst = plt.figure(2)
+figst = plt.figure(200)
 figst.set_facecolor('w')
 
-folder_movie = './movieele_' + tag
-try:
-    os.mkdir(folder_movie)
-except:
-    pass
+if flag_movie:
+    folder_movie = './movieele_' + tag
+    try:
+        os.mkdir(folder_movie)
+    except:
+        pass
 
+if flag_movie:
+    turn_list = range(movie_range[0], movie_range[1])
+else:
+    turn_list = [i_turn]
 
-for i_frame, i_turn in enumerate(range(movie_range[0], movie_range[1])):
+for i_frame, i_turn_curr in enumerate(turn_list):
     
-    print('movie turn %d'%i_turn)
-    figst.clf()
+    print('movie turn %d'%i_turn_curr)
+
 
     N_rings = dict_config['N_parellel_rings']
-    i_ring = int(np.mod(i_turn, N_rings))
-    i_iter_ring = i_turn//N_rings
+    i_ring = int(np.mod(i_turn_curr, N_rings))
+    i_iter_ring = i_turn_curr//N_rings
 
 
     ob = mfm.myloadmat_to_obj(sim_folder+'/cloud_evol_ring%d__iter%d.mat'%(i_ring, i_iter_ring))
     t_ref = ob.t[0]
 
-    # ~ plt.figure(1)
-    # ~ ax1 = plt.subplot(2,1,1)
-    # ~ ax1.plot((ob.t-t_ref)/1e-9, ob.Nel_timep)
-    # ~ ax2 = plt.subplot(2,1,2, sharex=ax1)
-    # ~ ax2.plot((ob.t-t_ref), ob.lam_t_array)
+    # axbup1.plot((ob.t-t_ref)/1e-9, ob.Nel_timep)
+    # axbup2.plot((ob.t-t_ref), ob.lam_t_array)
 
     Dx = np.mean(np.diff(ob.xg_hist))
 
-
-    plt.pcolormesh(ob.xg_hist*1e3, ((ob.t_hist-t_ref)/b_spac)[::N_slots_bsp], ob.nel_hist[::N_slots_bsp, :]/Dx, 
-                    vmax=vmax, cmap='jet', shading='gouraud')
-    plt.plot(x_mat[i_turn-1, :][mask_bunch]*1e3, np.arange(n_bunches), '.w', lw=2, markersize=5)
-    cb=plt.colorbar()
+    figst.clf()
+    axst = figst.add_subplot(1,1,1)
+    mappable = axst.pcolormesh(ob.xg_hist*1e3, ((ob.t_hist-t_ref)/b_spac)[::N_slots_bsp], ob.nel_hist[::N_slots_bsp, :]/Dx, 
+                    vmax=vmax_movie, cmap='jet', shading='gouraud')
+    axst.plot(x_mat[i_turn_curr-1, :][mask_bunch]*1e3, np.arange(n_bunches), '.w', lw=2, markersize=5)
+    cb=plt.colorbar(mappable, ax=axst)
     cb.set_label('Electron density [m^-3]')
-    plt.xlim(ob.xg_hist[0]*1e3, ob.xg_hist[-1]*1e3)
-    plt.ylim(0, n_bunches)
-    plt.xlabel('x [mm]')
-    plt.ylabel('Bunch passage')
+    axst.set_xlim(ob.xg_hist[0]*1e3, ob.xg_hist[-1]*1e3)
+    axst.set_ylim(0, n_bunches)
+    axst.set_xlabel('x [mm]')
+    axst.set_ylabel('Bunch passage')
     figst.subplots_adjust(bottom=.12)
-    figst.suptitle('Turn %d'%i_turn)
+    figst.suptitle('Turn %d'%i_turn_curr)
 
 
-    figst.savefig(folder_movie+'/frame_%05d.png'%i_frame, dpi=200)
+    if flag_movie:
+        figst.savefig(folder_movie+'/frame_%05d.png'%i_frame, dpi=200)
     
-os.system(' '.join([
-    'ffmpeg',
-    '-i %s'%folder_movie+'/frame_%05d.png',
-    '-c:v libx264 -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2,setpts=4.*PTS"',
-    '-profile:v high -level:v 4.0 -pix_fmt yuv420p -crf 22 -codec:a aac movieele_%s.mp4'%tag])) 
+if flag_movie:
+    os.system(' '.join([
+        'ffmpeg',
+        '-i %s'%folder_movie+'/frame_%05d.png',
+        '-c:v libx264 -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2,setpts=4.*PTS"',
+        '-profile:v high -level:v 4.0 -pix_fmt yuv420p -crf 22 -codec:a aac movieele_%s.mp4'%tag])) 
 
 
 # #down sample nel_hist
