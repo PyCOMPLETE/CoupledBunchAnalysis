@@ -29,6 +29,10 @@ sim_folder = '../test_on_HPC_cluster_speed/004_multibunch_with_ecloud'
 tag = 'test_on_HPC_cluster_speed'
 n_rings = 40
 
+sim_folder = '../test3_on_HPC_25ns/004_multibunch_with_ecloud'
+tag = 'test3_on_HPC_25ns'
+n_rings = 45
+
 
 
 list_files = [sim_folder+'/bunch_monitor_ring%03d.h5'%ii for ii in range(n_rings)]

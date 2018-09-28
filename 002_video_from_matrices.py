@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 import myfilemanager as mfm
 
-tag = 'test_on_HPC_cluster_speed'
+tag = 'test3_on_HPC_25ns'
 
 ob = mfm.myloadmat_to_obj(tag+'_matrices.mat')
 
