@@ -103,37 +103,65 @@ axm3.grid('on')
 
 figm.suptitle('Turn %d'%i_turn)
 
-N_rings = dict_config['N_parellel_rings']
-i_ring = int(np.mod(i_turn, N_rings))
-i_iter_ring = i_turn//N_rings
 
 
-ob = mfm.myloadmat_to_obj(sim_folder+'/cloud_evol_ring%d__iter%d.mat'%(i_ring, i_iter_ring))
-t_ref = ob.t[0]
-
-plt.figure(1)
-ax1 = plt.subplot(2,1,1)
-ax1.plot((ob.t-t_ref)/1e-9, ob.Nel_timep)
-ax2 = plt.subplot(2,1,2, sharex=ax1)
-ax2.plot((ob.t-t_ref), ob.lam_t_array)
-
-Dx = np.mean(np.diff(ob.xg_hist))
+movie_range = (250, 700)
 
 vmax = 2e11
 
 figst = plt.figure(2)
 figst.set_facecolor('w')
-plt.pcolormesh(ob.xg_hist*1e3, ((ob.t_hist-t_ref)/b_spac)[::N_slots_bsp], ob.nel_hist[::N_slots_bsp, :]/Dx, 
-                vmax=vmax, cmap='jet')
-plt.plot(x_mat[i_turn-1, :][mask_bunch]*1e3, np.arange(n_bunches), '.w', lw=2, markersize=5)
-cb=plt.colorbar()
-cb.set_label('Electron density [m^-3]')
-plt.xlim(ob.xg_hist[0]*1e3, ob.xg_hist[-1]*1e3)
-plt.ylim(0, n_bunches)
-plt.xlabel('x [mm]')
-plt.ylabel('Bunch passage')
-figst.subplots_adjust(bottom=.12)
-figst.suptitle('Turn %d'%i_turn)
+
+folder_movie = './movieele_' + tag
+try:
+    os.mkdir(folder_movie)
+except:
+    pass
+
+
+for i_frame, i_turn in enumerate(range(movie_range[0], movie_range[1])):
+    
+    print('movie turn %d'%i_turn)
+    figst.clf()
+
+    N_rings = dict_config['N_parellel_rings']
+    i_ring = int(np.mod(i_turn, N_rings))
+    i_iter_ring = i_turn//N_rings
+
+
+    ob = mfm.myloadmat_to_obj(sim_folder+'/cloud_evol_ring%d__iter%d.mat'%(i_ring, i_iter_ring))
+    t_ref = ob.t[0]
+
+    # ~ plt.figure(1)
+    # ~ ax1 = plt.subplot(2,1,1)
+    # ~ ax1.plot((ob.t-t_ref)/1e-9, ob.Nel_timep)
+    # ~ ax2 = plt.subplot(2,1,2, sharex=ax1)
+    # ~ ax2.plot((ob.t-t_ref), ob.lam_t_array)
+
+    Dx = np.mean(np.diff(ob.xg_hist))
+
+
+    plt.pcolormesh(ob.xg_hist*1e3, ((ob.t_hist-t_ref)/b_spac)[::N_slots_bsp], ob.nel_hist[::N_slots_bsp, :]/Dx, 
+                    vmax=vmax, cmap='jet', shading='gouraud')
+    plt.plot(x_mat[i_turn-1, :][mask_bunch]*1e3, np.arange(n_bunches), '.w', lw=2, markersize=5)
+    cb=plt.colorbar()
+    cb.set_label('Electron density [m^-3]')
+    plt.xlim(ob.xg_hist[0]*1e3, ob.xg_hist[-1]*1e3)
+    plt.ylim(0, n_bunches)
+    plt.xlabel('x [mm]')
+    plt.ylabel('Bunch passage')
+    figst.subplots_adjust(bottom=.12)
+    figst.suptitle('Turn %d'%i_turn)
+
+
+    figst.savefig(folder_movie+'/frame_%05d.png'%i_frame, dpi=200)
+    
+os.system(' '.join([
+    'ffmpeg',
+    '-i %s'%folder_movie+'/frame_%05d.png',
+    '-c:v libx264 -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2,setpts=4.*PTS"',
+    '-profile:v high -level:v 4.0 -pix_fmt yuv420p -crf 22 -codec:a aac movieele_%s.mp4'%tag])) 
+
 
 # #down sample nel_hist
 # avg_pos = []
