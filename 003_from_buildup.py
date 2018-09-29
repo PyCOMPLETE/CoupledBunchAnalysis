@@ -10,14 +10,33 @@ import myfilemanager as mfm
 
 sim_folder = '../test3_on_HPC_25ns/004_multibunch_with_ecloud'
 tag = 'test3_on_HPC_25ns'
-
 i_turn = 601
 b_spac = 25e-9
 N_slots_bsp = 5
-
-flag_movie = True
-movie_range = (0, 700)
+flag_movie = False
+movie_range = (0, 900)
 vmax_movie = 2e11
+corr_turn = 1
+
+sim_folder = '../test7_on_HPC_25ns_checksynch/004_multibunch_with_ecloud'
+tag = 'test7_on_HPC_25ns_checksynch'
+i_turn = 0
+b_spac = 25e-9
+N_slots_bsp = 5
+flag_movie = True
+movie_range = (0, 20)
+vmax_movie = 2e11
+corr_turn = 0
+
+sim_folder = '../test8_on_HPC_25ns_swaporder/004_multibunch_with_ecloud'
+tag = 'test8_on_HPC_25ns_swaporder'
+i_turn = 0
+b_spac = 25e-9
+N_slots_bsp = 5
+flag_movie = False
+movie_range = (0, 20)
+vmax_movie = 2e11
+corr_turn = 0
 
 
 obbea = mfm.myloadmat_to_obj(tag+'_matrices.mat')
@@ -138,12 +157,15 @@ for i_frame, i_turn_curr in enumerate(turn_list):
     i_ring = int(np.mod(i_turn_curr, N_rings))
     i_iter_ring = i_turn_curr//N_rings
 
-
-    ob = mfm.myloadmat_to_obj(sim_folder+'/cloud_evol_ring%d__iter%d.mat'%(i_ring, i_iter_ring))
+    try:
+        ob = mfm.myloadmat_to_obj(sim_folder+'/cloud_evol_ring%d__iter%d.mat'%(i_ring, i_iter_ring))
+    except TypeError:
+        ob.nel_hist *= 0.
     t_ref = ob.t[0]
 
-    # axbup1.plot((ob.t-t_ref)/1e-9, ob.Nel_timep)
-    # axbup2.plot((ob.t-t_ref), ob.lam_t_array)
+    if not flag_movie:
+        axbup1.semilogy((ob.t-t_ref)/1e-9, ob.Nel_timep)
+        axbup2.plot((ob.t-t_ref)/1e-9, ob.lam_t_array)
 
     Dx = np.mean(np.diff(ob.xg_hist))
 
@@ -151,7 +173,7 @@ for i_frame, i_turn_curr in enumerate(turn_list):
     axst = figst.add_subplot(1,1,1)
     mappable = axst.pcolormesh(ob.xg_hist*1e3, ((ob.t_hist-t_ref)/b_spac)[::N_slots_bsp], ob.nel_hist[::N_slots_bsp, :]/Dx, 
                     vmax=vmax_movie, cmap='jet', shading='gouraud')
-    axst.plot(x_mat[i_turn_curr-1, :][mask_bunch]*1e3, np.arange(n_bunches), '.w', lw=2, markersize=5)
+    axst.plot(x_mat[i_turn_curr-corr_turn, :][mask_bunch]*1e3, np.arange(n_bunches), '.w', lw=2, markersize=5)
     cb=plt.colorbar(mappable, ax=axst)
     cb.set_label('Electron density [m^-3]')
     axst.set_xlim(ob.xg_hist[0]*1e3, ob.xg_hist[-1]*1e3)

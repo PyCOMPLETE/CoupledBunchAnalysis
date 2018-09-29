@@ -47,9 +47,12 @@ def parse_pyparislog(filename):
     tturn_steps = t_arr[iter_turn_steps] 
 
     n_turns_steps = list(set(np.diff(iturn_steps)))
-    assert len(n_turns_steps)==1
-    n_turns_steps = n_turns_steps[0]
-
-    avgt_turn_steps = np.diff(tturn_steps)/n_turns_steps
+    if len(n_turns_steps)==1:
+        n_turns_steps = n_turns_steps[0]
+        avgt_turn_steps = np.diff(tturn_steps)/n_turns_steps
+    else:
+        print('Warning: n_turns_steps is empty')
+        n_turns_steps = np.nan
+        avgt_turn_steps = np.nan
 
     return dict_config, ibun_arr, t_arr, iturn_arr, iter_turn_steps, iturn_steps, tturn_steps, n_turns_steps, avgt_turn_steps
