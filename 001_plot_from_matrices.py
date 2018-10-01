@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import myfilemanager as mfm
 
 tag = 'test3_on_HPC_25ns'
+tag = 'test9_on_HPC_25ns_correct'
 
 ob = mfm.myloadmat_to_obj(tag+'_matrices.mat')
 
@@ -27,7 +28,7 @@ axn = plt.subplot(3,1,3, sharex=axx)
 axn.plot(n_mat[:,mask_bunch])
 
 
-i_turn = 420
+i_turn = 350
 
 figm = plt.figure(10, figsize=(8,6*1.3))
 axm1 = figm.add_subplot(3,1,1)

@@ -39,6 +39,17 @@ vmax_movie = 2e11
 corr_turn = 0
 
 
+sim_folder = '../test9_on_HPC_25ns_correct/004_multibunch_with_ecloud'
+tag = 'test9_on_HPC_25ns_correct'
+i_turn = 350
+b_spac = 25e-9
+N_slots_bsp = 5
+flag_movie = True
+movie_range = (0, 380)
+vmax_movie = 2e11
+corr_turn = 0
+
+
 obbea = mfm.myloadmat_to_obj(tag+'_matrices.mat')
 
 dict_config, ibun_arr, t_arr, iturn_arr, iter_turn_steps, \

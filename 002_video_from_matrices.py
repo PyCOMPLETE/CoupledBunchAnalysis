@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 import myfilemanager as mfm
 
-tag = 'test3_on_HPC_25ns'
+tag = 'test9_on_HPC_25ns_correct'
 
 ob = mfm.myloadmat_to_obj(tag+'_matrices.mat')
 

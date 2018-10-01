@@ -41,6 +41,11 @@ sim_folder = '../test8_on_HPC_25ns_swaporder/004_multibunch_with_ecloud'
 tag = 'test8_on_HPC_25ns_swaporder'
 n_rings = 45
 
+sim_folder = '../test9_on_HPC_25ns_correct/004_multibunch_with_ecloud'
+tag = 'test9_on_HPC_25ns_correct'
+n_rings = 45
+
+
 list_files = [sim_folder+'/bunch_monitor_ring%03d.h5'%ii for ii in range(n_rings)]
 
 import myfilemanager as mfm
