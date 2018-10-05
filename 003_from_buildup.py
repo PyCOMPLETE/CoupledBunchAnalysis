@@ -8,35 +8,37 @@ import parse_pyparislog as ppl
 import mystyle as ms
 import myfilemanager as mfm
 
+x_lim = 18e-3
+
 sim_folder = '../test3_on_HPC_25ns/004_multibunch_with_ecloud'
 tag = 'test3_on_HPC_25ns'
-i_turn = 601
+i_turn = 800
 b_spac = 25e-9
 N_slots_bsp = 5
-flag_movie = False
+flag_movie = True
 movie_range = (0, 900)
 vmax_movie = 2e11
 corr_turn = 1
 
-sim_folder = '../test7_on_HPC_25ns_checksynch/004_multibunch_with_ecloud'
-tag = 'test7_on_HPC_25ns_checksynch'
-i_turn = 0
-b_spac = 25e-9
-N_slots_bsp = 5
-flag_movie = True
-movie_range = (0, 20)
-vmax_movie = 2e11
-corr_turn = 0
+# sim_folder = '../test7_on_HPC_25ns_checksynch/004_multibunch_with_ecloud'
+# tag = 'test7_on_HPC_25ns_checksynch'
+# i_turn = 0
+# b_spac = 25e-9
+# N_slots_bsp = 5
+# flag_movie = True
+# movie_range = (0, 20)
+# vmax_movie = 2e11
+# corr_turn = 0
 
-sim_folder = '../test8_on_HPC_25ns_swaporder/004_multibunch_with_ecloud'
-tag = 'test8_on_HPC_25ns_swaporder'
-i_turn = 0
-b_spac = 25e-9
-N_slots_bsp = 5
-flag_movie = False
-movie_range = (0, 20)
-vmax_movie = 2e11
-corr_turn = 0
+# sim_folder = '../test8_on_HPC_25ns_swaporder/004_multibunch_with_ecloud'
+# tag = 'test8_on_HPC_25ns_swaporder'
+# i_turn = 0
+# b_spac = 25e-9
+# N_slots_bsp = 5
+# flag_movie = False
+# movie_range = (0, 20)
+# vmax_movie = 2e11
+# corr_turn = 0
 
 
 sim_folder = '../test9_on_HPC_25ns_correct/004_multibunch_with_ecloud'
@@ -45,7 +47,17 @@ i_turn = 350
 b_spac = 25e-9
 N_slots_bsp = 5
 flag_movie = True
-movie_range = (0, 380)
+movie_range = (0, 800)
+vmax_movie = 2e11
+corr_turn = 0
+
+sim_folder = '../test10_onHPC_144b/004_multibunch_with_ecloud'
+tag = 'test10_onHPC_144b'
+i_turn = 100
+b_spac = 25e-9
+N_slots_bsp = 5
+flag_movie = False
+movie_range = (0, 800)
 vmax_movie = 2e11
 corr_turn = 0
 
@@ -144,7 +156,7 @@ if not flag_movie:
     axbup1 = plt.subplot(2,1,1)
     axbup2 = plt.subplot(2,1,2, sharex=axbup1)
 
-figst = plt.figure(200)
+figst = plt.figure(200, figsize=(8*1.5*1.1,6*1.1))
 figst.set_facecolor('w')
 
 if flag_movie:
@@ -158,6 +170,9 @@ if flag_movie:
     turn_list = range(movie_range[0], movie_range[1])
 else:
     turn_list = [i_turn]
+    
+
+maxnel = None
 
 for i_frame, i_turn_curr in enumerate(turn_list):
     
@@ -181,18 +196,56 @@ for i_frame, i_turn_curr in enumerate(turn_list):
     Dx = np.mean(np.diff(ob.xg_hist))
 
     figst.clf()
-    axst = figst.add_subplot(1,1,1)
+    axst = figst.add_subplot(1,2,1)
     mappable = axst.pcolormesh(ob.xg_hist*1e3, ((ob.t_hist-t_ref)/b_spac)[::N_slots_bsp], ob.nel_hist[::N_slots_bsp, :]/Dx, 
                     vmax=vmax_movie, cmap='jet', shading='gouraud')
     axst.plot(x_mat[i_turn_curr-corr_turn, :][mask_bunch]*1e3, np.arange(n_bunches), '.w', lw=2, markersize=5)
     cb=plt.colorbar(mappable, ax=axst)
     cb.set_label('Electron density [m^-3]')
-    axst.set_xlim(ob.xg_hist[0]*1e3, ob.xg_hist[-1]*1e3)
+    axst.set_xlim(-x_lim*1e3, x_lim*1e3)
     axst.set_ylim(0, n_bunches)
     axst.set_xlabel('x [mm]')
     axst.set_ylabel('Bunch passage')
-    figst.subplots_adjust(bottom=.12)
+    figst.subplots_adjust(bottom=.12, left=.07, right=0.93, wspace=.26, hspace=.34)
     figst.suptitle('Turn %d'%i_turn_curr)
+
+    axst_xy = plt.subplot2grid(shape=(2,2), loc=(0,1), rowspan=1, colspan=1, fig=figst)
+    axnel = plt.subplot2grid(shape=(2,2), loc=(1,1), rowspan=1, colspan=1, fig=figst, sharex=axst_xy)
+    axst_n = axnel.twinx()
+
+    axst_xy.plot(x_mat[i_turn_curr, :][mask_bunch]*1e3, '.-')
+    
+    axst_xy.grid('on')
+    axnel.plot((ob.t-t_ref)/b_spac, ob.Nel_timep, 'g', lw=2)
+    axst_n.plot(n_mat[i_turn_curr, :][mask_bunch], '.-r', lw=1.5, markersize=6)
+    axnel.grid('on')
+    
+    if not maxnel:
+        maxnel = np.max(ob.Nel_timep)
+
+    for ibef in range(10):
+        if i_turn_curr-ibef-1>=0:
+            axst_xy.plot(x_mat[i_turn_curr-ibef-1, :][mask_bunch]*1e3, '--', color='k', alpha=0.5)
+
+    axst_xy.set_ylim(1e3*np.array([-1., 1.])*np.max(np.abs(x_mat)))
+    
+    axst_n.set_ylim(np.array([0., 1.1])*np.max(np.abs(n_mat)))
+    axst_n.ticklabel_format(style='sci', scilimits=(0,0),axis='y')
+
+    axnel.set_ylim(0, maxnel*1.2)
+    axnel.set_xlim(0, n_bunches)
+    axst_xy.set_ylabel('x [mm]', color='b')
+    axst_xy.tick_params(axis='y', colors='b')
+
+    axnel.set_ylabel('N. electrons [m^-1]', color='g')
+    axnel.tick_params(axis='y', colors='green')
+    axst_n.set_ylabel('N. macropart.', color='r')
+    axst_n.tick_params(axis='y', colors='r')
+    axnel.set_xlabel('Bunch passage')
+    # axnel.ticklabel_format(style='sci', scilimits=(0,0),axis='y')
+
+
+    # axm3.set_ylim(np.array([0, 1.1])*np.max(np.abs(n_mat)))
 
 
     if flag_movie:

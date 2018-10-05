@@ -45,6 +45,9 @@ sim_folder = '../test9_on_HPC_25ns_correct/004_multibunch_with_ecloud'
 tag = 'test9_on_HPC_25ns_correct'
 n_rings = 45
 
+sim_folder = '../test10_onHPC_144b/004_multibunch_with_ecloud'
+tag = 'test10_onHPC_144b'
+n_rings = 94
 
 list_files = [sim_folder+'/bunch_monitor_ring%03d.h5'%ii for ii in range(n_rings)]
 
