@@ -49,10 +49,19 @@ sim_folder = '../test10_onHPC_144b/004_multibunch_with_ecloud'
 tag = 'test10_onHPC_144b'
 n_rings = 94
 
+sim_folder = '../test11_on_HPC_25ns_more_slices/004_multibunch_with_ecloud'
+tag = 'test11_on_HPC_25ns_more_slices'
+n_rings = 45
+
+sim_folder = '../test12_onHPC_288b/004_multibunch_with_ecloud'
+tag = 'test12_onHPC_288b'
+n_rings = 150
+
+
 list_files = [sim_folder+'/bunch_monitor_ring%03d.h5'%ii for ii in range(n_rings)]
 
 import myfilemanager as mfm
-dict_data = mfm.bunchh5list_to_dict(list_files)
+dict_data = mfm.bunchh5list_to_dict(list_files, permissive=True)
 
 print 'Data loaded!'
 

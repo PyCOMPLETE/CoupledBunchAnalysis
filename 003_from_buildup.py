@@ -43,7 +43,27 @@ corr_turn = 1
 
 sim_folder = '../test9_on_HPC_25ns_correct/004_multibunch_with_ecloud'
 tag = 'test9_on_HPC_25ns_correct'
-i_turn = 350
+i_turn = 800
+b_spac = 25e-9
+N_slots_bsp = 5
+flag_movie = False
+movie_range = (0, 800)
+vmax_movie = 2e11
+corr_turn = 0
+
+sim_folder = '../test10_onHPC_144b/004_multibunch_with_ecloud'
+tag = 'test10_onHPC_144b'
+i_turn = 450
+b_spac = 25e-9
+N_slots_bsp = 5
+flag_movie = True
+movie_range = (0, 670)
+vmax_movie = 2e11
+corr_turn = 0
+
+sim_folder = '../test11_on_HPC_25ns_more_slices/004_multibunch_with_ecloud'
+tag = 'test11_on_HPC_25ns_more_slices'
+i_turn = 450
 b_spac = 25e-9
 N_slots_bsp = 5
 flag_movie = True
@@ -51,13 +71,13 @@ movie_range = (0, 800)
 vmax_movie = 2e11
 corr_turn = 0
 
-sim_folder = '../test10_onHPC_144b/004_multibunch_with_ecloud'
-tag = 'test10_onHPC_144b'
-i_turn = 100
+sim_folder = '../test12_onHPC_288b/004_multibunch_with_ecloud'
+tag = 'test12_onHPC_288b'
+i_turn = 450
 b_spac = 25e-9
 N_slots_bsp = 5
-flag_movie = False
-movie_range = (0, 800)
+flag_movie = True
+movie_range = (0, 1200)
 vmax_movie = 2e11
 corr_turn = 0
 
@@ -110,7 +130,7 @@ n_turns = x_mat.shape[0]
 
 mask_bunch = n_mat[1, :]>0
 n_bunches = np.sum(mask_bunch)
-
+bslots = np.where(mask_bunch)[0]/N_slots_bsp
 
 figrt = plt.figure(2000)
 axx = plt.subplot(3,1,1)
@@ -127,14 +147,14 @@ axm3 = figm.add_subplot(3,1,3, sharex=axm1)
 
 mask_bunch = n_mat[1, :]>0
 
-axm1.plot(x_mat[i_turn, :][mask_bunch], '.-')
-axm2.plot(y_mat[i_turn, :][mask_bunch], '.-')
-axm3.plot(n_mat[i_turn, :][mask_bunch], '.-')
+axm1.plot(bslots, x_mat[i_turn, :][mask_bunch], '.-')
+axm2.plot(bslots, y_mat[i_turn, :][mask_bunch], '.-')
+axm3.plot(bslots, n_mat[i_turn, :][mask_bunch], '.-')
 
 for ibef in xrange(10):
     if i_turn-ibef-1>=0:
-        axm1.plot(x_mat[i_turn-ibef-1, :][mask_bunch], '--', color='k', alpha=0.5)
-        axm2.plot(y_mat[i_turn-ibef-1, :][mask_bunch], '--', color='k', alpha=0.5)
+        axm1.plot(bslots, x_mat[i_turn-ibef-1, :][mask_bunch], '--', color='k', alpha=0.5)
+        axm2.plot(bslots, y_mat[i_turn-ibef-1, :][mask_bunch], '--', color='k', alpha=0.5)
 
 axm1.set_ylim(np.array([-1., 1.])*np.max(np.abs(x_mat)))
 axm2.set_ylim(np.array([-1., 1.])*np.max(np.abs(y_mat)))
@@ -199,11 +219,11 @@ for i_frame, i_turn_curr in enumerate(turn_list):
     axst = figst.add_subplot(1,2,1)
     mappable = axst.pcolormesh(ob.xg_hist*1e3, ((ob.t_hist-t_ref)/b_spac)[::N_slots_bsp], ob.nel_hist[::N_slots_bsp, :]/Dx, 
                     vmax=vmax_movie, cmap='jet', shading='gouraud')
-    axst.plot(x_mat[i_turn_curr-corr_turn, :][mask_bunch]*1e3, np.arange(n_bunches), '.w', lw=2, markersize=5)
+    axst.plot(x_mat[i_turn_curr-corr_turn, :][mask_bunch]*1e3, bslots, '.w', lw=2, markersize=5)
     cb=plt.colorbar(mappable, ax=axst)
     cb.set_label('Electron density [m^-3]')
     axst.set_xlim(-x_lim*1e3, x_lim*1e3)
-    axst.set_ylim(0, n_bunches)
+    axst.set_ylim(0, np.max(bslots))
     axst.set_xlabel('x [mm]')
     axst.set_ylabel('Bunch passage')
     figst.subplots_adjust(bottom=.12, left=.07, right=0.93, wspace=.26, hspace=.34)
@@ -213,11 +233,11 @@ for i_frame, i_turn_curr in enumerate(turn_list):
     axnel = plt.subplot2grid(shape=(2,2), loc=(1,1), rowspan=1, colspan=1, fig=figst, sharex=axst_xy)
     axst_n = axnel.twinx()
 
-    axst_xy.plot(x_mat[i_turn_curr, :][mask_bunch]*1e3, '.-')
+    axst_xy.plot(bslots, x_mat[i_turn_curr, :][mask_bunch]*1e3, '.-')
     
     axst_xy.grid('on')
     axnel.plot((ob.t-t_ref)/b_spac, ob.Nel_timep, 'g', lw=2)
-    axst_n.plot(n_mat[i_turn_curr, :][mask_bunch], '.-r', lw=1.5, markersize=6)
+    axst_n.plot(bslots, n_mat[i_turn_curr, :][mask_bunch], '.-r', lw=1.5, markersize=6)
     axnel.grid('on')
     
     if not maxnel:
@@ -225,7 +245,7 @@ for i_frame, i_turn_curr in enumerate(turn_list):
 
     for ibef in range(10):
         if i_turn_curr-ibef-1>=0:
-            axst_xy.plot(x_mat[i_turn_curr-ibef-1, :][mask_bunch]*1e3, '--', color='k', alpha=0.5)
+            axst_xy.plot(bslots, x_mat[i_turn_curr-ibef-1, :][mask_bunch]*1e3, '--', color='k', alpha=0.5)
 
     axst_xy.set_ylim(1e3*np.array([-1., 1.])*np.max(np.abs(x_mat)))
     
@@ -233,7 +253,7 @@ for i_frame, i_turn_curr in enumerate(turn_list):
     axst_n.ticklabel_format(style='sci', scilimits=(0,0),axis='y')
 
     axnel.set_ylim(0, maxnel*1.2)
-    axnel.set_xlim(0, n_bunches)
+    axnel.set_xlim(0, np.max(bslots))
     axst_xy.set_ylabel('x [mm]', color='b')
     axst_xy.tick_params(axis='y', colors='b')
 

@@ -2,6 +2,7 @@ import time
 import numpy as np
 import parse_pyparislog as ppl
 import matplotlib.pyplot as plt
+import mystyle as ms
 
 na = np.array
 
@@ -39,23 +40,42 @@ groups = [
 },
 ] 
 
-# list_folders = [
+
+# groups = [
+# {
+# 'list_folders' : [
 # '../test5_on_HPC_8bunches/004_multibunch_with_ecloud/',
 # '../test5_on_HPC_16bunches/004_multibunch_with_ecloud/',
 # '../test5_on_HPC_32bunches/004_multibunch_with_ecloud/',
 # '../test5_on_HPC_64bunches/004_multibunch_with_ecloud/',
-# ];fact_HT = 1.
+#     ],'fact_HT' :1., 'n_bunches':1, 'tag':'nbun_scan'
+# },
+# ] 
+
+# groups = [
+# {
+# 'list_folders' : [
+# '../test9bis_on_HPC_25ns_correct_be_long/004_multibunch_with_ecloud/',
+# '../test10_onHPC_144b/004_multibunch_with_ecloud/',
+#     ],'fact_HT' :1., 'n_bunches':1, 'tag':'nbun_scan'
+# },
+# ]
+
 
 
 plt.close('all')
-fig1 = plt.figure(1, figsize=(8,6*1.5))
+ms.mystyle_arial(fontsz=14, dist_tick_lab=5)
+fig1 = plt.figure(1, figsize=(8,6*1.3))
+fig1.set_facecolor('white')
 ax1 = fig1.add_subplot(2,1,1)
 ax2 = fig1.add_subplot(2,1,2, sharex=ax1)
 
 fig10 = plt.figure(10)
+fig10.set_facecolor('white')
 ax10 = fig10.add_subplot(1,1,1)
 
 fig20 = plt.figure(20)
+fig20.set_facecolor('white')
 ax20 = fig20.add_subplot(1,1,1)
 
 for gg in groups:
@@ -92,22 +112,26 @@ for gg in groups:
     ax2.grid(True)
     ax2.set_ylabel('N slots per bunch passage')
 
-    ax10.semilogy(n_cores_list, np.array(avgt_turn_steps_list)/3600, '.-', label=tag)
+    ax10.plot(n_cores_list, np.array(avgt_turn_steps_list)/3600, '.-', label=tag)
     ax10.set_ylabel('Time per turn [h]')
     ax10.grid(True)
 
-    ax20.semilogy(n_cores_list, 1000*np.array(avgt_turn_steps_list)/3600/24, '.-', label=tag)
+    ax20.plot(n_cores_list, 1000*np.array(avgt_turn_steps_list)/3600/24, '.-', label=tag)
     ax20.set_ylabel('Time per 1000 turns [days]')
     ax20.grid(True)
     
-ax1.plot([1,640], [1,640], 'k')
+ax1.plot([1,max(n_cores_list)], [1,max(n_cores_list)], 'k')
+
+for ax in [ax2, ax10, ax20]:
+    ax.set_xlabel('N. CPU cores')
 
 
 for fig in [fig1, fig10, fig20]:
     fig.legend(loc='best')
-    
-figcomp = plt.figure(100)
-plt.plot(groups[1]['avgt_turn']/groups[0]['avgt_turn'])
+
+if  len(groups)>1:  
+    figcomp = plt.figure(100)
+    plt.plot(groups[1]['avgt_turn']/groups[0]['avgt_turn'])
 
 
 plt.show()

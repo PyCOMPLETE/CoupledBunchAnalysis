@@ -24,6 +24,13 @@ sim_folder = '../test3_on_HPC_25ns/004_multibunch_with_ecloud'
 sim_folder = '../test4_on_HPC_8slot/004_multibunch_with_ecloud'
 sim_folder = '../test6_on_HPC_8slot/004_multibunch_with_ecloud'
 
+sim_folder = '../test9_on_HPC_25ns_correct/004_multibunch_with_ecloud'
+#sim_folder = '../test11_on_HPC_25ns_more_slices/004_multibunch_with_ecloud'
+
+#sim_folder = '../test9bis_on_HPC_25ns_correct_be_long/004_multibunch_with_ecloud'
+
+sim_folder = '../test10_onHPC_144b/004_multibunch_with_ecloud'
+
 import parse_pyparislog as ppl
 dict_config, ibun_arr, t_arr, iturn_arr, iter_turn_steps, \
     iturn_steps, tturn_steps, n_turns_steps, avgt_turn_steps = ppl.parse_pyparislog(sim_folder+'/pyparislog.txt')
@@ -35,7 +42,7 @@ Dt_iter_filtered = np.convolve(Dt_iter, np.ones(n_filter)/float(n_filter), mode=
 
 import matplotlib.pyplot as plt
 # plt.close('all')
-fig1 = plt.figure(figsize=(8,1.5*6))
+fig1 = plt.figure(figsize=(8,1.3*6))
 ax1=plt.subplot(4,1,1)
 plt.plot(Dt_iter, '.-')
 plt.plot(Dt_iter_filtered, 'r-')

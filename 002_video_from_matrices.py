@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import myfilemanager as mfm
 
 tag = 'test9_on_HPC_25ns_correct'
+tag = 'test11_on_HPC_25ns_more_slices'
 
 ob = mfm.myloadmat_to_obj(tag+'_matrices.mat')
 
