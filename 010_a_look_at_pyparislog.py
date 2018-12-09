@@ -31,6 +31,12 @@ sim_folder = '../test9_on_HPC_25ns_correct/004_multibunch_with_ecloud'
 
 sim_folder = '../test10_onHPC_144b/004_multibunch_with_ecloud'
 
+# For e-cloud meeting
+sim_folder = '../test2_on_HPC_8slot/004_multibunch_with_ecloud'
+sim_folder = '../test4_on_HPC_8slot/004_multibunch_with_ecloud'
+sim_folder = '../test6_on_HPC_8slot/004_multibunch_with_ecloud'
+
+
 import parse_pyparislog as ppl
 dict_config, ibun_arr, t_arr, iturn_arr, iter_turn_steps, \
     iturn_steps, tturn_steps, n_turns_steps, avgt_turn_steps = ppl.parse_pyparislog(sim_folder+'/pyparislog.txt')
@@ -43,22 +49,31 @@ Dt_iter_filtered = np.convolve(Dt_iter, np.ones(n_filter)/float(n_filter), mode=
 import matplotlib.pyplot as plt
 # plt.close('all')
 fig1 = plt.figure(figsize=(8,1.3*6))
+fig1.set_facecolor('w')
 ax1=plt.subplot(4,1,1)
 plt.plot(Dt_iter, '.-')
 plt.plot(Dt_iter_filtered, 'r-')
-ax1.set_ylabel('Iteration time [s]')
+ax1.set_ylabel('Iteration\ntime [s]')
 ax1.set_ylim(bottom=0)
 ax2=plt.subplot(4,1,2, sharex=ax1)
 plt.plot(ibun_arr, '.-')
-ax2.set_ylabel('"Bunch" at CPU 0')
+ax2.set_ylabel('"Bunch slot"\nat CPU 0')
 ax3=plt.subplot(4,1,3, sharex=ax1)
 plt.plot(iturn_arr, '.-')
 ax3.plot(iter_turn_steps, iturn_steps, '.r')
-ax3.set_ylabel('Turn at CPU 0')
+ax3.set_ylabel('Turn\nat CPU 0')
 ax4=plt.subplot(4,1,4, sharex=ax1)
 plt.plot((np.array(t_arr)-t_arr[0])/3600., '.-')
-ax4.set_ylabel('Accumulated time [h]')
+ax4.set_ylabel('Accumulated\ntime [h]')
+
 for ax in [ax1, ax2, ax3, ax4]:
     ax.grid('on')
+    ax.yaxis.set_major_locator(plt.MaxNLocator(4))
+
+for ax in [ax1, ax2, ax3]:
+    ax.tick_params(labelbottom=False)
+
 fig1.suptitle(sim_folder)
+fig1.subplots_adjust(top=0.935, bottom=0.055, left=0.15, right=0.9, 
+        hspace=0.295, wspace=0.2)
 plt.show()
