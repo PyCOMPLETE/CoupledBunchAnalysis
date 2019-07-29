@@ -4,18 +4,13 @@ import matplotlib.pyplot as plt
 
 import myfilemanager as mfm
 
-tag = 'test3_on_HPC_25ns'
-tag = 'test9_on_HPC_25ns_correct'
-tag = 'test11_on_HPC_25ns_more_slices'
-tag = 'test12_onHPC_288b'
-
-
+tag = 'noecloud'
 
 ob = mfm.myloadmat_to_obj(tag+'_matrices.mat')
 
-x_mat = ob.x_mat
-y_mat = ob.y_mat
-n_mat = ob.n_mat
+x_mat = ob.mean_x
+y_mat = ob.mean_y
+n_mat = ob.macroparticlenumber
 
 n_turns = x_mat.shape[0]
 
@@ -32,7 +27,7 @@ axn = plt.subplot(3,1,3, sharex=axx)
 axn.plot(n_mat[:,mask_bunch])
 
 
-i_turn = 350
+i_turn = 3
 
 figm = plt.figure(10, figsize=(8,6*1.3))
 axm1 = figm.add_subplot(3,1,1)

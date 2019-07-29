@@ -1,67 +1,32 @@
-import sys, os
-
-
 import numpy as np
 
 
+sim_folder = '../PyECLOUD_coupled_bunch_example'
+tag = 'noecloud'
+n_rings = 3 
 
-sim_folder = '../first_test/PyPARIS/004_multibunch_with_ecloud/'
-tag = 'first_sim_20b'
-n_rings = 8
-
-sim_folder = '../test_40b/'
-tag = 'sim_40b'
-n_rings = 10
-
-sim_folder = '../test_20b_8kicks_12.5ns/004_multibunch_with_ecloud'
-tag = 'sim_20b_8kicks'
-n_rings = 5
-
-sim_folder = '../test_20b_8kicks/004_multibunch_with_ecloud'
-tag = 'sim_20b_8kicks_correct'
-n_rings = 5
-
-sim_folder = '../test_20b_8kicks_onlyH/004_multibunch_with_ecloud'
-tag = 'sim_20b_8kicks_onlyH'
-n_rings = 5
-
-sim_folder = '../test_on_HPC_cluster_speed/004_multibunch_with_ecloud'
-tag = 'test_on_HPC_cluster_speed'
-n_rings = 40
-
-sim_folder = '../test3_on_HPC_25ns/004_multibunch_with_ecloud'
-tag = 'test3_on_HPC_25ns'
-n_rings = 45
-
-sim_folder = '../test7_on_HPC_25ns_checksynch/004_multibunch_with_ecloud'
-tag = 'test7_on_HPC_25ns_checksynch'
-n_rings = 45
-
-sim_folder = '../test8_on_HPC_25ns_swaporder/004_multibunch_with_ecloud'
-tag = 'test8_on_HPC_25ns_swaporder'
-n_rings = 45
-
-sim_folder = '../test9_on_HPC_25ns_correct/004_multibunch_with_ecloud'
-tag = 'test9_on_HPC_25ns_correct'
-n_rings = 45
-
-sim_folder = '../test10_onHPC_144b/004_multibunch_with_ecloud'
-tag = 'test10_onHPC_144b'
-n_rings = 94
-
-sim_folder = '../test11_on_HPC_25ns_more_slices/004_multibunch_with_ecloud'
-tag = 'test11_on_HPC_25ns_more_slices'
-n_rings = 45
-
-sim_folder = '../test12_onHPC_288b/004_multibunch_with_ecloud'
-tag = 'test12_onHPC_288b'
-n_rings = 150
+to_be_saved = [
+ 'epsn_x',
+ 'epsn_y',
+ 'epsn_z',
+ 'macroparticlenumber',
+ 'mean_dp',
+ 'mean_x',
+ 'mean_xp',
+ 'mean_y',
+ 'mean_yp',
+ 'mean_z',
+ 'sigma_dp',
+ 'sigma_x',
+ 'sigma_y',
+ 'sigma_z']
 
 
-list_files = [sim_folder+'/bunch_monitor_ring%03d.h5'%ii for ii in range(n_rings)]
 
-import myfilemanager as mfm
-dict_data = mfm.bunchh5list_to_dict(list_files, permissive=True)
+list_files = [sim_folder+'/bunch_monitor_part000_ring%03d.h5'%ii for ii in range(n_rings)]
+
+import PyPARIS.myfilemanager as mfm
+dict_data = mfm.monitorh5list_to_dict(list_files, permissive=True)
 
 print 'Data loaded!'
 
@@ -81,24 +46,17 @@ for i_bunch_obs in range(n_bunches):
     list_bunches.append(dict_bunch)
 
 
-x_mat = np.zeros((n_turns, n_bunches))
-y_mat = np.zeros((n_turns, n_bunches))
-n_mat = np.zeros((n_turns, n_bunches))
+dict_matrices = {kk: np.zeros((n_turns, n_bunches)) for kk in to_be_saved}
 
 for i_bunch_obs in range(n_bunches):
     n_turns_this = len(list_bunches[i_bunch_obs]['epsn_x'])
     mask_notnan = ~np.isnan(list_bunches[i_bunch_obs]['macroparticlenumber'])
-    x_mat[:n_turns_this, i_bunch_obs][mask_notnan] = list_bunches[i_bunch_obs]['mean_x'][mask_notnan]
-    y_mat[:n_turns_this, i_bunch_obs][mask_notnan] = list_bunches[i_bunch_obs]['mean_y'][mask_notnan]
-    n_mat[:n_turns_this, i_bunch_obs][mask_notnan] = list_bunches[i_bunch_obs]['macroparticlenumber'][mask_notnan]
+    
+    for kk in to_be_saved:
+        dict_matrices[kk][:n_turns_this, i_bunch_obs][mask_notnan] =\
+                list_bunches[i_bunch_obs][kk][mask_notnan]
 
 
 import scipy.io as sio
-sio.savemat(tag+'_matrices.mat',
-    {
-   'x_mat':x_mat, 
-   'y_mat':y_mat, 
-   'n_mat':n_mat
-    }, 
-    oned_as='row')
+sio.savemat(tag+'_matrices.mat', dict_matrices, oned_as='row')
     
