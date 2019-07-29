@@ -40,8 +40,9 @@ def make_part_matrices(list_files, to_be_saved):
         for ii in xrange(len(dict_data['i_bunch'])):
             if int(dict_data['i_bunch'][ii]) == int(i_bunch_obs):
                 i_turn = int(dict_data['i_turn'][ii])
-                for kk in dict_data.keys():
-                    dict_bunch[kk][i_turn] = dict_data[kk][ii]
+                if dict_data['macroparticlenumber'][ii] > 0:
+                    for kk in dict_data.keys():
+                        dict_bunch[kk][i_turn] = dict_data[kk][ii]
                     
         list_bunches.append(dict_bunch)
     
