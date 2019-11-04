@@ -2,26 +2,17 @@ import numpy as np
 
 import PyPARIS.myfilemanager as mfm
 
-sim_folder = '../PyECLOUD_coupled_bunch_example'
-tag = 'noecloud'
-n_rings = 3
-n_parts = 2
+sim_folder = '../HL-LHC_coupled_bunch_450GeV_2.3e11_144b_sim_class'
+tag = 'simclass_test'
+n_rings = 10
+n_parts = 6
 
 to_be_saved = [
- 'epsn_x',
- 'epsn_y',
- 'epsn_z',
  'n_macroparticles_per_slice',
- 'mean_dp',
  'mean_x',
- 'mean_xp',
  'mean_y',
- 'mean_yp',
  'mean_z',
- 'sigma_dp',
- 'sigma_x',
- 'sigma_y',
- 'sigma_z']
+]
 
 
 def make_part_matrices(list_files, to_be_saved):
@@ -51,7 +42,7 @@ def make_part_matrices(list_files, to_be_saved):
     dict_matrices = {kk: np.zeros((n_slices, n_turns, n_bunches)) for kk in to_be_saved}
     
     for i_bunch_obs in range(n_bunches):
-        n_turns_this = len(list_bunches[i_bunch_obs]['epsn_x'])
+        n_turns_this = len(list_bunches[i_bunch_obs]['mean_x'])
         mask_notnan = ~np.isnan(list_bunches[i_bunch_obs]['n_macroparticles_per_slice'])
         
         for kk in to_be_saved:
