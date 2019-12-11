@@ -10,127 +10,44 @@ import myfilemanager as mfm
 
 x_lim = 18e-3
 
-sim_folder = '../test3_on_HPC_25ns/004_multibunch_with_ecloud'
-tag = 'test3_on_HPC_25ns'
-i_turn = 800
+sim_folder = '../HL-LHC_coupled_bunch_450GeV_2.3e11_144b_sey1.5'
+tag = 'HL_sey1.5'
 b_spac = 25e-9
 N_slots_bsp = 5
 flag_movie = True
-movie_range = (0, 900)
+movie_range = (0, 1000)
 vmax_movie = 2e11
 corr_turn = 1
+N_turns_part = 500
+N_rings = 100
 
-# sim_folder = '../test7_on_HPC_25ns_checksynch/004_multibunch_with_ecloud'
-# tag = 'test7_on_HPC_25ns_checksynch'
-# i_turn = 0
+# sim_folder = '../HL-LHC_coupled_bunch_450GeV_2.3e11_144b_sey1.5_both_planes'
+# tag = 'HL_sey1.5_xy'
 # b_spac = 25e-9
 # N_slots_bsp = 5
 # flag_movie = True
-# movie_range = (0, 20)
+# movie_range = (0, 1000)
 # vmax_movie = 2e11
-# corr_turn = 0
+# corr_turn = 1
+# N_turns_part = 500
+# N_rings = 100
 
-# sim_folder = '../test8_on_HPC_25ns_swaporder/004_multibunch_with_ecloud'
-# tag = 'test8_on_HPC_25ns_swaporder'
-# i_turn = 0
-# b_spac = 25e-9
-# N_slots_bsp = 5
-# flag_movie = False
-# movie_range = (0, 20)
-# vmax_movie = 2e11
-# corr_turn = 0
-
-
-sim_folder = '../test9_on_HPC_25ns_correct/004_multibunch_with_ecloud'
-tag = 'test9_on_HPC_25ns_correct'
-i_turn = 800
-b_spac = 25e-9
-N_slots_bsp = 5
-flag_movie = False
-movie_range = (0, 800)
-vmax_movie = 2e11
-corr_turn = 0
-
-sim_folder = '../test10_onHPC_144b/004_multibunch_with_ecloud'
-tag = 'test10_onHPC_144b'
-i_turn = 450
-b_spac = 25e-9
-N_slots_bsp = 5
-flag_movie = True
-movie_range = (0, 670)
-vmax_movie = 2e11
-corr_turn = 0
-
-sim_folder = '../test11_on_HPC_25ns_more_slices/004_multibunch_with_ecloud'
-tag = 'test11_on_HPC_25ns_more_slices'
-i_turn = 450
-b_spac = 25e-9
-N_slots_bsp = 5
-flag_movie = True
-movie_range = (0, 800)
-vmax_movie = 2e11
-corr_turn = 0
-
-sim_folder = '../test12_onHPC_288b/004_multibunch_with_ecloud'
-tag = 'test12_onHPC_288b'
-i_turn = 450
-b_spac = 25e-9
-N_slots_bsp = 5
-flag_movie = True
-movie_range = (0, 1200)
-vmax_movie = 2e11
-corr_turn = 0
-
+i_turn = 300
 
 obbea = mfm.myloadmat_to_obj(tag+'_matrices.mat')
 
-dict_config, ibun_arr, t_arr, iturn_arr, iter_turn_steps, \
-    iturn_steps, tturn_steps, n_turns_steps, avgt_turn_steps = ppl.parse_pyparislog(sim_folder+'/pyparislog.txt')
-
-
-
-
-
-plt.close('all')
-ms.mystyle_arial(fontsz=16, dist_tick_lab=5)
-
-Dt_iter = np.diff(t_arr)
-n_filter = 10
-Dt_iter_filtered = np.convolve(Dt_iter, np.ones(n_filter)/float(n_filter), mode='same')
-
-
-fig1 = plt.figure(100, figsize=(8,1.5*6))
-ax1=plt.subplot(4,1,1)
-plt.plot(Dt_iter, '.-')
-plt.plot(Dt_iter_filtered, 'r-')
-ax1.set_ylabel('Iteration time [s]')
-ax1.set_ylim(bottom=0)
-ax2=plt.subplot(4,1,2, sharex=ax1)
-plt.plot(ibun_arr, '.-')
-ax2.set_ylabel('"Bunch" at CPU 0')
-ax3=plt.subplot(4,1,3, sharex=ax1)
-plt.plot(iturn_arr, '.-')
-ax3.plot(iter_turn_steps, iturn_steps, '.r')
-ax3.set_ylabel('Turn at CPU 0')
-ax4=plt.subplot(4,1,4, sharex=ax1)
-plt.plot((np.array(t_arr)-t_arr[0])/3600., '.-')
-ax4.set_ylabel('Accumulated time [h]')
-for ax in [ax1, ax2, ax3, ax4]:
-    ax.grid('on')
-fig1.suptitle(sim_folder)
-
-
-
-
-x_mat = obbea.x_mat
-y_mat = obbea.y_mat
-n_mat = obbea.n_mat
+x_mat = obbea.mean_x
+y_mat = obbea.mean_y
+n_mat = obbea.macroparticlenumber
 
 n_turns = x_mat.shape[0]
 
 mask_bunch = n_mat[1, :]>0
 n_bunches = np.sum(mask_bunch)
 bslots = np.where(mask_bunch)[0]/N_slots_bsp
+
+plt.close('all')
+ms.mystyle_arial(fontsz=16, dist_tick_lab=5)
 
 figrt = plt.figure(2000)
 axx = plt.subplot(3,1,1)
@@ -199,12 +116,12 @@ for i_frame, i_turn_curr in enumerate(turn_list):
     print('movie turn %d'%i_turn_curr)
 
 
-    N_rings = dict_config['N_parellel_rings']
+    i_part = i_turn_curr//N_turns_part
     i_ring = int(np.mod(i_turn_curr, N_rings))
-    i_iter_ring = i_turn_curr//N_rings
+    i_iter_ring = (i_turn_curr - N_turns_part * i_part)//N_rings
 
     try:
-        ob = mfm.myloadmat_to_obj(sim_folder+'/cloud_evol_ring%d__iter%d.mat'%(i_ring, i_iter_ring))
+        ob = mfm.myloadmat_to_obj(sim_folder+'/cloud_evol_part%03d_ring%03d__iter%d.mat'%(i_part, i_ring, i_iter_ring))
     except TypeError:
         ob.nel_hist *= 0.
     t_ref = ob.t[0]
@@ -273,10 +190,15 @@ for i_frame, i_turn_curr in enumerate(turn_list):
     
 if flag_movie:
     os.system(' '.join([
-        'ffmpeg',
-        '-i %s'%folder_movie+'/frame_%05d.png',
-        '-c:v libx264 -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2,setpts=4.*PTS"',
-        '-profile:v high -level:v 4.0 -pix_fmt yuv420p -crf 22 -codec:a aac movieele_%s.mp4'%tag])) 
+        'avconv',
+        '-r 10 -i %s'%folder_movie+'/frame_%05d.png',
+        '-c:v libx264 -preset placebo -profile:v high -pix_fmt yuv420p -crf 22 -codec:a aac movieele_%s.mp4'%tag]))
+
+    # os.system(' '.join([
+    #     'ffmpeg',
+    #     '-i %s'%folder_movie+'/frame_%05d.png',
+    #     '-c:v libx264 -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2,setpts=4.*PTS"',
+    #     '-profile:v high -level:v 4.0 -pix_fmt yuv420p -crf 22 -codec:a aac movieele_%s.mp4'%tag]))
 
 
 # #down sample nel_hist

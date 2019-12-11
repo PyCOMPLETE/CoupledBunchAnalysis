@@ -2,10 +2,73 @@ import numpy as np
 
 import PyPARIS.myfilemanager as mfm
 
-sim_folder = '../HL-LHC_coupled_bunch_450GeV_2.3e11_144b_sim_class'
-tag = 'simclass_test'
-n_rings = 10
-n_parts = 6
+sim_folder = '../HL-LHC_coupled_bunch_450GeV_1.1e11_144b'
+tag = 'HL_1.1e11_144b'
+n_rings = 100
+n_parts = 2
+
+sim_folder = '../HL-LHC_coupled_bunch_450GeV_2.3e11_144b'
+tag = 'HL_2.3e11_144b'
+n_rings = 100
+n_parts = 2
+
+sim_folder = '../HL-LHC_coupled_bunch_450GeV_2.3e11_144b_Qp15'
+tag = 'HL_2.3e11_144b_Qp15'
+n_rings = 100
+n_parts = 2  #2nd part not finished 
+
+sim_folder = '../HL-LHC_coupled_bunch_450GeV_2.3e11_144b_Qp0_Koct-4.5'
+tag = 'HL_2.3e11_144b_Koct-4.5'
+n_rings = 100
+n_parts = 3  #2nd part not finished 
+
+sim_folder = '../HL-LHC_coupled_bunch_450GeV_2.3e11_144b_Qp15_Oct-4.5'
+tag = 'HL_2.3e11_144b_Qp15_Koct-4.5'
+n_rings = 100
+n_parts = 3  #2nd part not finished 
+
+sim_folder = '../HL-LHC_coupled_bunch_450GeV_2.3e11_144b_sey1.5'
+tag = 'HL_2.3e11_144b_sey1.5'
+n_rings = 100
+n_parts = 2
+
+sim_folder = '../HL-LHC_coupled_bunch_450GeV_2.3e11_144b_sey1.5_both_planes'
+tag = 'HL_2.3e11_144b_sey1.5_xy'
+n_rings = 100
+n_parts = 2
+
+sim_folder = '../HL-LHC_coupled_bunch_450GeV_1.1e11_144b_damper'
+tag = 'HL_1.1e11_144b_fb'
+n_rings = 100
+n_parts = 1
+
+sim_folder = '../HL-LHC_coupled_bunch_450GeV_2.3e11_144b_damper'
+tag = 'HL_2.3e11_144b_fb'
+n_rings = 100
+# n_parts = 6
+n_parts = 4 ### Too much data for saving all 6 parts to file ###
+
+sim_folder = '../HL-LHC_coupled_bunch_450GeV_2.3e11_144b_damper_100turns'
+tag = 'HL_2.3e11_144b_fb_100t'
+n_rings = 100
+# n_parts = 6
+n_parts = 4 ### Too much data for saving all 6 parts to file ###
+
+sim_folder = '../HL-LHC_coupled_bunch_450GeV_2.3e11_144b_Qp15_damper'
+tag = 'HL_2.3e11_144b_Qp15_fb'
+n_rings = 100
+n_parts = 2 #?
+
+sim_folder = '../HL-LHC_coupled_bunch_450GeV_2.3e11_144b_Qp0_Koct-4.5_damper'
+tag = 'HL_2.3e11_144b_Koct-4.5_fb'
+n_rings = 100
+n_parts = 3 #?
+
+# sim_folder = '../HL-LHC_coupled_bunch_450GeV_2.3e11_144b_Qp15_Koct-4.5_damper'
+# tag = 'HL_2.3e11_144b_Qp15_Koct-4.5_fb'
+# n_rings = 100
+# n_parts = 3 #?
+
 
 to_be_saved = [
  'n_macroparticles_per_slice',
@@ -42,7 +105,7 @@ def make_part_matrices(list_files, to_be_saved):
     dict_matrices = {kk: np.zeros((n_slices, n_turns, n_bunches)) for kk in to_be_saved}
     
     for i_bunch_obs in range(n_bunches):
-        n_turns_this = len(list_bunches[i_bunch_obs]['mean_x'])
+        n_turns_this = len(list_bunches[i_bunch_obs]['mean_x'][0,:])
         mask_notnan = ~np.isnan(list_bunches[i_bunch_obs]['n_macroparticles_per_slice'])
         
         for kk in to_be_saved:
@@ -63,7 +126,7 @@ for kk in list_dicts[0].keys():
             [dd[kk] for dd in list_dicts], axis=1)
 
 import scipy.io as sio
-sio.savemat(tag+'_slice_matrices.mat', dict_matrices, oned_as='row')
-mfm.dict_to_h5(dict_matrices, tag+'_slice_matrices.h5', compression='gzip')
+# sio.savemat(tag+'_slice_matrices.mat', dict_matrices, oned_as='row')
+mfm.dict_to_h5(dict_matrices, tag+'_matrices_slices.h5', compression='gzip')
 
     

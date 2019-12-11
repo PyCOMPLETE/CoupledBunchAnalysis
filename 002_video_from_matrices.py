@@ -4,14 +4,24 @@ import matplotlib.pyplot as plt
 
 import myfilemanager as mfm
 
-tag = 'test9_on_HPC_25ns_correct'
-tag = 'test11_on_HPC_25ns_more_slices'
+# tag = 'HL_1.1e11_144b'
+# tag = 'HL_1.1e11_144b_fb'
+
+# tag = 'HL_2.3e11_144b'
+# tag = 'HL_2.3e11_144b_fb'
+tag = 'HL_2.3e11_144b_fb_100t'
+
+# tag = 'HL_2.3e11_144b_Qp15'
+# tag = 'HL_2.3e11_144b_Qp15_fb'
+
+# tag = 'HL_2.3e11_144b_sey1.5'
+# tag = 'HL_2.3e11_144b_sey1.5_xy'
 
 ob = mfm.myloadmat_to_obj(tag+'_matrices.mat')
 
-x_mat = ob.x_mat
-y_mat = ob.y_mat
-n_mat = ob.n_mat
+x_mat = ob.mean_x
+y_mat = ob.mean_y
+n_mat = ob.macroparticlenumber
 
 n_turns = x_mat.shape[0]
 
@@ -60,12 +70,9 @@ for i_turn in xrange(n_turns):
     figm.savefig(folder_movie+'/turn_%05d.png'%i_turn, dpi=200)
 
 os.system(' '.join([
-    'ffmpeg',
-    '-i %s'%folder_movie+'/turn_%05d.png',
-    '-c:v libx264 -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2,setpts=4.*PTS"',
-    '-profile:v high -level:v 4.0 -pix_fmt yuv420p -crf 22 -codec:a aac movie_%s.mp4'%tag])) 
-    
-    
+    'avconv',
+    '-r 10 -i %s'%folder_movie+'/turn_%05d.png',
+    '-c:v libx264 -profile:v high -pix_fmt yuv420p -crf 22 -codec:a aac movie_%s.mp4'%tag])) 
 
 
 plt.show()

@@ -5,39 +5,47 @@ sys.path.append('../NAFFlib')
 import matplotlib.pyplot as plt
 import numpy as np
 
-import nafflib as NAFF
+import NAFFlib as NAFF
 import myfilemanager as mfm
 
-tag = 'test9_on_HPC_25ns_correct'
+tag = 'HL_1.1e11_144b'
 
 ob = mfm.myloadmat_to_obj(tag+'_matrices.mat')
 
+x_mat = ob.mean_x
+y_mat = ob.mean_y
+n_mat = ob.macroparticlenumber
 
-mask_bunch = ob.n_mat[1, :]>0
+mask_bunch = n_mat[1, :]>0
 N_bunches = np.sum(mask_bunch)
 
-
-x_mat = ob.x_mat[:,mask_bunch]
-y_mat = ob.y_mat[:,mask_bunch]
-n_mat = ob.n_mat[:,mask_bunch]
+x_mat_m = x_mat[:,mask_bunch]
+y_mat_m = y_mat[:,mask_bunch]
+n_mat_m = n_mat[:,mask_bunch]
 
 
 plt.close('all')
 
 fig1 = plt.figure(1)
 axx = plt.subplot(3,1,1)
-axx.plot(x_mat)
+axx.plot(x_mat_m)
 axy = plt.subplot(3,1,2, sharex=axx)
-axy.plot(y_mat)
+axy.plot(y_mat_m)
 axn = plt.subplot(3,1,3, sharex=axx)
-axn.plot(n_mat)
+axn.plot(n_mat_m)
 
-tune_list = []
-i_start = 0+50+50+50+50
-i_stop = 50+50+50+50+50
-for ii in range(N_bunches):
-    tune_list.append(NAFF.get_tune(x_mat[i_start:i_stop, ii]))
-
+i_start = 0
+i_stop = 50
+plt.figure(2)
+axt = plt.subplot(1,1,1)
+for n_win in range(7):
+    tune_list = []
+    for ii in range(N_bunches):
+        i_0 = i_start+n_win*i_stop
+        i_1 = (n_win+1)*i_stop
+        tune_list.append(NAFF.get_tune(x_mat_m[i_0:i_1, ii]))
+    axt.plot(tune_list, label='%d-%d'%(i_0, i_1))
+axt.legend()
 
 plt.show()
 
